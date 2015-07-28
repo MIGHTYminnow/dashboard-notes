@@ -1,0 +1,22 @@
+{
+  "name": "dashboard-notes",
+  "title": "Dashboard Notes",
+  "description": "Add notes to the WordPress admin.",
+  "version": "1.0.3",
+  "homepage": "http://wordpress.org/plugins/dashboard-notes",
+  "author": {
+    "name": "Mickey Kay",
+    "email": "mickeyskay@gmail.com",
+    "url": "http://mightyminnow.com"
+  },
+  "devDependencies": {
+    "grunt": "latest",
+    "load-grunt-tasks": "latest",
+    "grunt-dev-update": "latest",
+    "grunt-prompt": "latest",
+    "grunt-text-replace": "latest",
+    "grunt-wp-i18n": "latest",
+    "grunt-contrib-copy": "^0.7.0"
+  },
+  "keywords": []
+}
