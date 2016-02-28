@@ -63,6 +63,9 @@ class DashboardNotes {
         // Amend widget controls with Widget Context controls
         add_action( 'sidebar_admin_setup', array( $this, 'attach_widget_controls' ) );
 
+        // Add widget controls.
+        add_action( 'in_widget_form', array( $this, 'add_widget_controls' ), 10, 2 );
+
         // Display dashboard notes
         add_action( 'admin_notices', array( $this, 'display_notices' ) );
     }
@@ -167,6 +170,10 @@ class DashboardNotes {
             $wp_registered_widget_controls[$widget_id]['dn_callback_original'] = $wp_registered_widget_controls[$widget_id]['callback'];
             $wp_registered_widget_controls[$widget_id]['callback'] = array($this, 'replace_widget_control_callback');
         }
+    }
+
+    function add_widget_controls( $widget, $instance = '' ) {
+    	echo $this->display_widget_controls( $widget->id );
     }
 
     function replace_widget_control_callback() {
