@@ -191,8 +191,15 @@ class DashboardNotes {
 				'url',
 				'urls'
 			),
-			__( 'Target URLs' ),
-			__( 'Enter one location fragment per line. Use <strong>*</strong> character as a wildcard. Example: <code>category/peace/*</code> to target all posts in category <em>peace</em>.')
+			__( 'Target URLs', 'dashboard-notes' ),
+			'<p>' . sprintf(
+				__( 'Enter one URL regex pattern per line, targeting the URL path after %s', 'dashboard-notes' ),
+				'<code>' . untrailingslashit( get_admin_url() ) . '</code>'
+			) . '</p>' .
+			'<p>' . sprintf(
+				__( 'For example, %s will show the widget when adding a new page.', 'dashboard-notes' ),
+				'<code>post-new.php?post_type=page</code>'
+			) . '</p>'
 		);
 
     	ob_start();
@@ -599,7 +606,7 @@ class DashboardNotes {
             $tip = sprintf( '<p class="dn-tip">%s</p>', $tip );
 
         return sprintf(
-            '<div class="dn-%s"><label><strong>%s</strong><textarea class="widefat" name="dn%s" rows="5">%s</textarea></label>%s</div>',
+            '<div class="dn-%s"><label><strong>%s</strong><textarea class="widefat" name="dn%s" rows="5">%s</textarea></label><div class="description">%s</div></div>',
             $this->get_field_classname( $name ),
             $label,
             $this->get_field_name( $name ),
