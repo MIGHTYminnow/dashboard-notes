@@ -34,7 +34,7 @@ class DashboardNotes {
     var $plugin_settings = array();
     var $words_on_page = 0;
     var $notes_logos;
-    
+
     function __construct() {
 
         // Don't do anything unless we're in the admin.
@@ -45,7 +45,7 @@ class DashboardNotes {
         add_action( 'plugins_loaded', array( $this, 'load_text_domain') );
 
         // Load plugin settings
-        add_action( 'init', array( $this, 'load_plugin_settings' ) );
+        add_action( 'after_setup_theme', array( $this, 'load_plugin_settings' ) );
 
         // Register sidebar
         add_action( 'widgets_init', array( $this, 'register_sidebar' ), 99 );
@@ -88,7 +88,7 @@ class DashboardNotes {
      * @return  array  Editable user roles.
      */
     function get_user_roles() {
-        
+
         global $wp_roles;
 
         $all_roles = $wp_roles->roles;
@@ -97,7 +97,7 @@ class DashboardNotes {
          * Filter the list of editable roles using WP's standard filter.
          *
          * @since  1.0.3
-         * 
+         *
          * @param  array  $editable_roles  Editable user roles.
          */
         $editable_roles = apply_filters( 'editable_roles', $all_roles );
@@ -106,7 +106,7 @@ class DashboardNotes {
          * Filter the list of editable roles using custom DN filter.
          *
          * @since  1.0.3
-         * 
+         *
          * @param  array  $editable_roles  Editable user roles.
          */
         $editable_roles = apply_filters( 'dn_editable_roles', $all_roles );
@@ -144,13 +144,13 @@ class DashboardNotes {
     function admin_scripts() {
         wp_enqueue_style( 'dashboard-notes-css', plugins_url( 'css/admin-styles.css', __FILE__ ) );
     }
-    
+
     /*===========================================
      * Attach widget controls
     ===========================================*/
     function attach_widget_controls() {
         global $wp_registered_widget_controls, $wp_registered_widgets;
-        
+
         // Get array of widgets that are in the Dashboard Notes sidebar
         $sidebar_widgets = wp_get_sidebars_widgets();
         $dn_widgets = ! empty( $sidebar_widgets[ $this->plugin_id ] ) ? $sidebar_widgets[ $this->plugin_id ] : '';
@@ -168,10 +168,10 @@ class DashboardNotes {
             $wp_registered_widget_controls[$widget_id]['callback'] = array($this, 'replace_widget_control_callback');
         }
     }
-    
+
     function replace_widget_control_callback() {
         global $wp_registered_widget_controls;
-        
+
         $all_params = func_get_args();
         if (is_array($all_params[1]))
             $widget_id = $all_params[1]['widget_id'];
@@ -179,14 +179,14 @@ class DashboardNotes {
             $widget_id = $all_params[0]['widget_id'];
 
         $original_callback = $wp_registered_widget_controls[$widget_id]['dn_callback_original'];
-        
+
         // Display the original callback
         if (isset($original_callback) && is_callable($original_callback)) {
             call_user_func_array($original_callback, $all_params);
         } else {
             echo '<!-- Dashboard Notes [controls]: could not call the original callback function -->';
         }
-        
+
         echo $this->display_widget_controls( $widget_id );
     }
 
@@ -213,11 +213,11 @@ class DashboardNotes {
      */
     function get_plugin_settings() {
 
-        return wp_parse_args( 
-            get_option( $this->plugin_id, array() ), 
-            $this->get_settings_defaults() 
+        return wp_parse_args(
+            get_option( $this->plugin_id, array() ),
+            $this->get_settings_defaults()
         );
-    
+
     }
 
     /**
@@ -295,10 +295,10 @@ class DashboardNotes {
             array( $this, 'role_settings_callback' ), // Callback
             $this->plugin_id // Page
         );
-        
+
         // Create checkbox for each role.
         foreach ( $this->get_user_roles() as $role_id => $role ) {
-            
+
             add_settings_field(
                 $role_id,
                 $role['name'],
@@ -311,7 +311,7 @@ class DashboardNotes {
                     'type' => 'checkbox',
                 )
             );
-                    
+
         }
 
     }
@@ -325,11 +325,11 @@ class DashboardNotes {
      *
      * @since  0.10.0
      */
-    public function checkbox_callback( $args ) {        
+    public function checkbox_callback( $args ) {
 
         $option_name = esc_attr( $this->plugin_id ) . '[' . $args['id'] . ']';
         $option_value = isset( $this->plugin_settings[ $args['id'] ] ) ? $this->plugin_settings[ $args['id'] ] : '';
-        
+
         printf(
             '<input type="checkbox" value="1" id="%s" name="%s" %s/>',
             $args['id'],
@@ -352,7 +352,7 @@ class DashboardNotes {
 
         // Initialize the new array that will hold the sanitize values.
         $new_input = array();
-                
+
         // Loop through the input and sanitize each of the values (true or false).
         foreach ( $this->get_user_roles() as $role_id => $role ) {
 
@@ -387,7 +387,7 @@ class DashboardNotes {
      * @return  boolean  true|false
      */
     function current_user_can_see_notices() {
-        
+
         // Get role(s) of current user.
         $current_roles = wp_get_current_user()->roles;
 
@@ -400,7 +400,7 @@ class DashboardNotes {
         }
 
         return false;
-                
+
     }
 
     /*===========================================
@@ -433,7 +433,7 @@ class DashboardNotes {
             $style = isset( $widget_options['style'] ) ? $widget_options['style'] : 'updated';
             $logo = isset( $widget_options['include-logo'] ) ? 'include-logo' : '';
             $widget_id = 'widget-id-' . $id;
-            $class = 'updated ' . $style . ' ' . $logo . ' ' . $widget_id;             
+            $class = 'updated ' . $style . ' ' . $logo . ' ' . $widget_id;
 
             $params = array_merge(
                 array( array_merge( $sidebar, array('widget_id' => $id, 'widget_name' => $wp_registered_widgets[$id]['name']) ) ),
@@ -458,7 +458,7 @@ class DashboardNotes {
             do_action( 'dynamic_sidebar', $wp_registered_widgets[$id] );
 
             // Output widget as notification
-            if ( is_callable( $callback ) && $this->check_widget_visibility( $id ) ) {                
+            if ( is_callable( $callback ) && $this->check_widget_visibility( $id ) ) {
                 // Output notice
                 ?>
                 <div class="<?php echo $class; ?> dashboard-note">
@@ -477,15 +477,15 @@ class DashboardNotes {
             }
         }
     }
-    
+
     function get_current_url() {
-        if ($_SERVER['REQUEST_URI'] == '') 
+        if ($_SERVER['REQUEST_URI'] == '')
             $uri = $_SERVER['REDIRECT_URL'];
-        else 
+        else
             $uri = $_SERVER['REQUEST_URI'];
-        
+
         return (is_ssl())
-        ? "https://".$_SERVER['SERVER_NAME'].$uri 
+        ? "https://".$_SERVER['SERVER_NAME'].$uri
         : "http://".$_SERVER['SERVER_NAME'].$uri;
     }
 
@@ -504,12 +504,12 @@ class DashboardNotes {
         return preg_match( $regexps, $path );
     }
 
-    
+
     function check_widget_visibility( $widget_id ) {
         // Show widget because no context settings found
         if ( ! isset( $this->dn_options[ $widget_id ] ) )
             return true;
-        
+
         $vis_settings = $this->dn_options[ $widget_id ];
 
         // Hide/show if forced
@@ -517,15 +517,15 @@ class DashboardNotes {
             return false;
         elseif ( $vis_settings['incexc'] == 'show' )
             return true;
-        
+
         $do_show = true;
         $do_show_by_select = false;
         $do_show_by_url = false;
         $do_show_by_word_count = false;
-        
+
         // Check by current URL
         if ( ! empty( $vis_settings['url']['urls'] ) )
-            if ( $this->match_path( $this->get_current_url(), $vis_settings['url']['urls'] ) ) 
+            if ( $this->match_path( $this->get_current_url(), $vis_settings['url']['urls'] ) )
                 $do_show_by_url = true;
 
         // Check by tag settings
@@ -563,14 +563,14 @@ class DashboardNotes {
                     $do_show_by_word_count = true;
                 else
                     $do_show_by_word_count = false;
-            }   
+            }
         }
 
         // Combine all context checks
         if ($do_show_by_word_count || $do_show_by_url || $do_show_by_select)
             $one_is_true = true;
         elseif (!$do_show_by_word_count || !$do_show_by_url || !$do_show_by_select)
-            $one_is_true = false;   
+            $one_is_true = false;
 
         if (($vis_settings['incexc'] == 'selected') && $one_is_true) {
             // Show on selected
@@ -595,7 +595,7 @@ class DashboardNotes {
      * Inteface Constructors
     ===========================================*/
     function make_simple_checkbox( $name, $label ) {
-        return sprintf( 
+        return sprintf(
             '<label class="dn-%s"><input type="checkbox" value="1" name="dn%s" %s />&nbsp;%s</label>',
             $this->get_field_classname( $name ),
             $this->get_field_name( $name ),
@@ -609,7 +609,7 @@ class DashboardNotes {
         if ( $tip )
             $tip = sprintf( '<p class="dn-tip">%s</p>', $tip );
 
-        return sprintf(  
+        return sprintf(
             '<div class="dn-%s">
             <label>
             <strong>%s</strong>
@@ -627,7 +627,7 @@ class DashboardNotes {
 
 
     function make_simple_textfield( $name, $label_before = null, $label_after = null) {
-        return sprintf( 
+        return sprintf(
             '<label class="dn-%s widefat">%s <input type="text" class="widefat" name="dn%s" value="%s" /> %s</label>',
             $this->get_field_classname( $name ),
             $label_before,
@@ -648,18 +648,18 @@ class DashboardNotes {
         foreach ( $selection as $sid => $svalue )
             $options[] = sprintf( '<option value="%s" %s>%s</option>', $sid, selected( $value, $sid, false ), $svalue );
 
-        return sprintf( 
+        return sprintf(
             '<label class="dn-%s">
-            %s 
+            %s
             <select name="dn%s">
             %s
-            </select> 
+            </select>
             %s
             </label>',
             $this->get_field_classname( $name ),
-            $label_before, 
-            $this->get_field_name( $name ), 
-            implode( '', $options ), 
+            $label_before,
+            $this->get_field_name( $name ),
+            implode( '', $options ),
             $label_after
             );
     }
@@ -695,7 +695,7 @@ class DashboardNotes {
             $value = $this->get_field_value( $parts, $options[ $part ] );
         elseif ( isset( $options[ $part ] ) )
             $value = $options[ $part ];
-        else 
+        else
             $value = '';
 
         return trim( $value );
