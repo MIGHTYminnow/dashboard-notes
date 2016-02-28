@@ -506,6 +506,9 @@ class DashboardNotes {
         // Strip home url and check only the REQUEST_URI part
         $path = trim( str_replace( trailingslashit( get_admin_url() ), '', $path ), '/' );
 
+        // If we're right on /wp-admin, force the path to '/'.
+        $path = $path ? $path : '/';
+
         foreach ( explode( "\n", $patterns ) as $pattern ) {
 
         	$pattern = trim( $pattern );
@@ -521,6 +524,7 @@ class DashboardNotes {
         $regexps = '/^('. preg_replace( array( '/(\r\n|\n| )+/', '/\\\\\*/' ), array( '|', '.*' ), preg_quote( implode( "\n", array_filter( $patterns_safe, 'trim' ) ), '/' ) ) .')$/';
 
         return preg_match( $regexps, $path );
+
     }
 
 
