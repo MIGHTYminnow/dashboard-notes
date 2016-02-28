@@ -148,66 +148,73 @@ class DashboardNotes {
         wp_enqueue_style( 'dashboard-notes-css', plugins_url( 'css/admin-styles.css', __FILE__ ) );
     }
 
-    /*===========================================
-     * Attach widget controls
-    ===========================================*/
-    function attach_widget_controls() {
-        global $wp_registered_widget_controls, $wp_registered_widgets;
+    function add_widget_controls( $widget, $instance = array() ) {
 
-        // Get array of widgets that are in the Dashboard Notes sidebar
-        $sidebar_widgets = wp_get_sidebars_widgets();
-        $dn_widgets = ! empty( $sidebar_widgets[ $this->plugin_id ] ) ? $sidebar_widgets[ $this->plugin_id ] : '';
+    	// Set up color control.
+    	$color_control = $this->make_simple_dropdown(
+    		array(
+    			$widget->id,
+    			'style'
+    		),
+    		array(
+    			'mm-green' => __( 'MIGHTYminnow Green' ),
+    			'green' => __( 'Green' ),
+    			'red' => __( 'Red' ),
+    			'orange' => __( 'Orange' ),
+    			'yellow' => __( 'Yellow' ),
+    			'blue' => __( 'Blue' )
+    		),
+			__( 'Style', 'dashboard-notes' )
+		);
 
-        if ( ! $dn_widgets )
-            return false;
+    	// Set up logo include control.
+		$include_logo_control = $this->make_simple_checkbox( array( $widget->id, 'include-logo' ), __( 'Include logo' ) );
 
-        // Attach special widget controls for widgets in the Dashboard Notes sidebar
-        foreach ( $dn_widgets as $widget_id ) {
-            // Pass widget id as param, so that we can later call the original callback function
-            $wp_registered_widget_controls[$widget_id]['params'][]['widget_id'] = $widget_id;
+		// Set up logo URL control.
+		$logo_url_control = $this->make_simple_textfield( array( $widget->id, 'logo-url' ), __( 'Logo URL:', 'dashboard-notes' ) );
 
-                // Store the original callback functions and replace them with Widget Context
-            $wp_registered_widget_controls[$widget_id]['dn_callback_original'] = $wp_registered_widget_controls[$widget_id]['callback'];
-            $wp_registered_widget_controls[$widget_id]['callback'] = array($this, 'replace_widget_control_callback');
-        }
-    }
+		// Set up include/exclude control.
+		$incexc_control = $this->make_simple_dropdown(
+			array(
+				$widget->id,
+				'incexc'
+			),
+			array(
+				'show' => __( 'Show everywhere'),
+				'hide' => __('Hide everywhere'),
+				'selected' => __('Show on selected URLs'),
+				'notselected' => __('Hide on selected URLs')
+			),
+			__( 'Where to show', 'dashboard-notes' )
+		);
 
-    function add_widget_controls( $widget, $instance = '' ) {
-    	echo $this->display_widget_controls( $widget->id );
-    }
+		// Set up URLs control.
+		$url_control = $this->make_simple_textarea(
+			array(
+				$widget->id,
+				'url',
+				'urls'
+			),
+			__( 'Target URLs' ),
+			__( 'Enter one location fragment per line. Use <strong>*</strong> character as a wildcard. Example: <code>category/peace/*</code> to target all posts in category <em>peace</em>.')
+		);
 
-    function replace_widget_control_callback() {
-        global $wp_registered_widget_controls;
+    	ob_start();
+    	?>
 
-        $all_params = func_get_args();
-        if (is_array($all_params[1]))
-            $widget_id = $all_params[1]['widget_id'];
-        else
-            $widget_id = $all_params[0]['widget_id'];
+    		<div class="dashboard-notes-controls">
+    			<h3><?php echo $this->plugin_name; ?></h3>
+    			<p><?php echo $color_control; ?></p>
+    			<p><?php echo $include_logo_control; ?></p>
+    			<p><?php echo $logo_url_control; ?></p>
+    			<p><?php echo $incexc_control; ?></p>
+    			<p><?php echo $url_control; ?></p>
+    		</div>
 
-        $original_callback = $wp_registered_widget_controls[$widget_id]['dn_callback_original'];
+    	<?php
+    	$controls = ob_get_clean();
 
-        // Display the original callback
-        if (isset($original_callback) && is_callable($original_callback)) {
-            call_user_func_array($original_callback, $all_params);
-        } else {
-            echo '<!-- Dashboard Notes [controls]: could not call the original callback function -->';
-        }
-
-        echo $this->display_widget_controls( $widget_id );
-    }
-
-    function display_widget_controls( $wid = null ) {
-
-        return  '<div class="dashboard-notes-controls">'
-        .       '<h3>' . $this->plugin_name . '</h3>'
-        .       '<p>' . $this->make_simple_dropdown( array( $wid, 'style' ), array( 'mm-green' => __( 'MIGHTYminnow Green' ), 'green' => __( 'Green' ), 'red' => __( 'Red' ), 'orange' => __( 'Orange' ), 'yellow' => __( 'Yellow' ), 'blue' => __( 'Blue' ) ) , __( '<b>Style</b><br />', 'dashboard-notes' ) ) . '</p>'
-        .       '<p><b>' . __( 'Logo', 'dashboard-notes' ) . '</b><br />'
-        .       $this->make_simple_checkbox( array( $wid, 'include-logo' ), __( 'Include logo</code>' ) ) . '</p>'
-        .       '<p>' . $this->make_simple_textfield( array( $wid, 'logo-url' ), __( 'Logo URL:', 'dashboard-notes' ) . '<br />', '<br /><small><i>' . __( '(defaults to MIGHTYminnow logo if no URL is specified', 'dashboard-notes' ) .'</i></small>' ) . '</p>'
-        .       '<p>' . $this->make_simple_dropdown( array( $wid, 'incexc' ), array( 'show' => __( 'Show everywhere'), 'hide' => __('Hide everywhere'), 'selected' => __('Show on selected URLs'), 'notselected' => __('Hide on selected URLs') ), __( '<b>Where to show</b><br />', 'dashboard-notes' ) ) . '</p>'
-        .       '<p>' . $this->make_simple_textarea( array( $wid, 'url', 'urls' ), __( 'Target URLs' ), __( 'Enter one location fragment per line. Use <strong>*</strong> character as a wildcard. Example: <code>category/peace/*</code> to target all posts in category <em>peace</em>.') ) . '</p>'
-        .   '</div>';
+    	echo $controls;
 
     }
 
@@ -599,7 +606,7 @@ class DashboardNotes {
 
 
     /*===========================================
-     * Inteface Constructors
+     * Interface Constructors
     ===========================================*/
     function make_simple_checkbox( $name, $label ) {
         return sprintf(
@@ -635,7 +642,7 @@ class DashboardNotes {
 
     function make_simple_textfield( $name, $label_before = null, $label_after = null) {
         return sprintf(
-            '<label class="dn-%s widefat">%s <input type="text" class="widefat" name="dn%s" value="%s" /> %s</label>',
+            '<label class="dn-%s widefat"><strong>%s</strong> <input type="text" class="widefat" name="dn%s" value="%s" /> %s</label>',
             $this->get_field_classname( $name ),
             $label_before,
             $this->get_field_name( $name ),
@@ -656,13 +663,7 @@ class DashboardNotes {
             $options[] = sprintf( '<option value="%s" %s>%s</option>', $sid, selected( $value, $sid, false ), $svalue );
 
         return sprintf(
-            '<label class="dn-%s">
-            %s
-            <select name="dn%s">
-            %s
-            </select>
-            %s
-            </label>',
+            '<label class="dn-%s"><strong>%s</strong><br /><select name="dn%s">%s</select>%s</label>',
             $this->get_field_classname( $name ),
             $label_before,
             $this->get_field_name( $name ),
