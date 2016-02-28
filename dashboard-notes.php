@@ -60,9 +60,6 @@ class DashboardNotes {
         // Add admin menu for config
         add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
-        // Amend widget controls with Widget Context controls
-        add_action( 'sidebar_admin_setup', array( $this, 'attach_widget_controls' ) );
-
         // Add widget controls.
         add_action( 'in_widget_form', array( $this, 'add_widget_controls' ), 10, 2 );
 
@@ -157,7 +154,6 @@ class DashboardNotes {
     			'style'
     		),
     		array(
-    			'mm-green' => __( 'MIGHTYminnow Green' ),
     			'green' => __( 'Green' ),
     			'red' => __( 'Red' ),
     			'orange' => __( 'Orange' ),
@@ -510,8 +506,17 @@ class DashboardNotes {
         // Strip home url and check only the REQUEST_URI part
         $path = trim( str_replace( trailingslashit( get_admin_url() ), '', $path ), '/' );
 
-        foreach ( explode( "\n", $patterns ) as $pattern )
-            $patterns_safe[] = trim( trim( $pattern ), '/' );
+        foreach ( explode( "\n", $patterns ) as $pattern ) {
+
+        	$pattern = trim( $pattern );
+
+        	if ( strlen( $pattern ) != 1 ) {
+        		$pattern = untrailingslashit( $pattern );
+        	}
+
+            $patterns_safe[] = $pattern;
+
+        }
 
         $regexps = '/^('. preg_replace( array( '/(\r\n|\n| )+/', '/\\\\\*/' ), array( '|', '.*' ), preg_quote( implode( "\n", array_filter( $patterns_safe, 'trim' ) ), '/' ) ) .')$/';
 
@@ -520,6 +525,7 @@ class DashboardNotes {
 
 
     function check_widget_visibility( $widget_id ) {
+
         // Show widget because no context settings found
         if ( ! isset( $this->dn_options[ $widget_id ] ) )
             return true;
@@ -527,72 +533,37 @@ class DashboardNotes {
         $vis_settings = $this->dn_options[ $widget_id ];
 
         // Hide/show if forced
-        if ( $vis_settings['incexc'] == 'hide' )
+        if ( $vis_settings['incexc'] == 'hide' ) {
             return false;
-        elseif ( $vis_settings['incexc'] == 'show' )
+        } elseif ( $vis_settings['incexc'] == 'show' ) {
             return true;
-
-        $do_show = true;
-        $do_show_by_select = false;
-        $do_show_by_url = false;
-        $do_show_by_word_count = false;
-
-        // Check by current URL
-        if ( ! empty( $vis_settings['url']['urls'] ) )
-            if ( $this->match_path( $this->get_current_url(), $vis_settings['url']['urls'] ) )
-                $do_show_by_url = true;
-
-        // Check by tag settings
-        if ( ! empty( $vis_settings['location'] ) ) {
-            $currently = array();
-
-            if ( is_front_page() && ! is_paged() ) $currently['is_front_page'] = true;
-            if ( is_home() && ! is_paged() ) $currently['is_home'] = true;
-            if ( is_page() && ! is_attachment() ) $currently['is_page'] = true;
-            if ( is_single() && ! is_attachment() ) $currently['is_single'] = true;
-            if ( is_archive() ) $currently['is_archive'] = true;
-            if ( is_category() ) $currently['is_category'] = true;
-            if ( is_tag() ) $currently['is_tag'] = true;
-            if ( is_author() ) $currently['is_author'] = true;
-            if ( is_search() ) $currently['is_search'] = true;
-            if ( is_404() ) $currently['is_404'] = true;
-            if ( is_attachment() ) $currently['is_attachment'] = true;
-
-            // Allow other plugins to override the above checks
-            $currently = apply_filters( 'widget_context_currently', $currently, $widget_id, $vis_settings );
-
-            // Check for selected pages/sections
-            if ( array_intersect_key( $currently, $vis_settings['location'] ) )
-                $do_show_by_select = true;
-
-            // Word count
-            if ( isset( $vis_settings['location']['check_wordcount'] ) ) {
-                // Check for word count
-                $word_count_to_check = intval( $vis_settings['location']['word_count'] );
-                $check_type = $vis_settings['location']['check_wordcount_type'];
-
-                if ( $this->words_on_page > $word_count_to_check && $check_type == 'more' )
-                    $do_show_by_word_count = true;
-                elseif ( $this->words_on_page < $word_count_to_check && $check_type == 'less' )
-                    $do_show_by_word_count = true;
-                else
-                    $do_show_by_word_count = false;
-            }
         }
 
-        // Combine all context checks
-        if ($do_show_by_word_count || $do_show_by_url || $do_show_by_select)
-            $one_is_true = true;
-        elseif (!$do_show_by_word_count || !$do_show_by_url || !$do_show_by_select)
-            $one_is_true = false;
+        $do_show = true;
+        $do_show_by_url = false;
 
-        if (($vis_settings['incexc'] == 'selected') && $one_is_true) {
-            // Show on selected
+        // Check by current URL
+        if ( ! empty( $vis_settings['url']['urls'] ) ) {
+
+            if ( $this->match_path( $this->get_current_url(), $vis_settings['url']['urls'] ) ) {
+                $do_show_by_url = true;
+            }
+
+        }
+
+        // Combine all context checks.
+        if ( $do_show_by_url ) {
+            $one_is_true = true;
+        } else {
+            $one_is_true = false;
+        }
+
+        // Combine all context checks.
+        if ( ( $vis_settings['incexc'] == 'selected' ) && $one_is_true ) {
             $do_show = true;
-        } elseif (($vis_settings['incexc'] == 'notselected') && !$one_is_true) {
-            // Hide on selected
+        } elseif ( ( $vis_settings['incexc'] == 'notselected' ) && ! $one_is_true ) {
             $do_show = true;
-        } elseif (!empty($vis_settings['incexc'])) {
+        } elseif ( ! empty( $vis_settings['incexc'] ) ) {
             $do_show = false;
         } else {
             $do_show = true;
@@ -624,13 +595,7 @@ class DashboardNotes {
             $tip = sprintf( '<p class="dn-tip">%s</p>', $tip );
 
         return sprintf(
-            '<div class="dn-%s">
-            <label>
-            <strong>%s</strong>
-            <textarea class="widefat" name="dn%s">%s</textarea>
-            </label>
-            %s
-            </div>',
+            '<div class="dn-%s"><label><strong>%s</strong><textarea class="widefat" name="dn%s" rows="5">%s</textarea></label>%s</div>',
             $this->get_field_classname( $name ),
             $label,
             $this->get_field_name( $name ),
