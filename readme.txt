@@ -12,6 +12,8 @@ Easily create notes/instructions in the WordPress admin using any widget you lik
 
 == Description ==
 
+**The plugin [Classic Widgets](https://wordpress.org/plugins/classic-widgets/) is needed (this plugin doesn't work with Gutenberg).**
+
 **Compatible with PHP 8.0**
 
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/dashboard-notes).**
