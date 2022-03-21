@@ -3,7 +3,7 @@ Contributors: McGuive7, MIGHTYminnow
 Tags: dashboard, admin, backend, notes, instructions, notifications, client
 Donate link: http://mightyminnow.com
 Requires at least: 3.0
-Tested up to: 5.7.1
+Tested up to: 5.9.2
 Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -11,6 +11,9 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Easily create notes/instructions in the WordPress admin using any widget you like!
 
 == Description ==
+
+**Compatible with PHP 8.0**
+
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/dashboard-notes).**
 
 Dashboard Notes lets you create super simple notes and instructions for your clients within the WordPress dashboard. Choose the color of the notification, whether or not to include a logo, and exactly what pages to include the notification on (uses simple URL matching).
