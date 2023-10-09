@@ -3,7 +3,7 @@ Contributors: McGuive7, MIGHTYminnow
 Tags: dashboard, admin, backend, notes, instructions, notifications, client
 Donate link: http://mightyminnow.com
 Requires at least: 3.0
-Tested up to: 6.2
+Tested up to: 6.3.1
 Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -14,7 +14,7 @@ Easily create notes/instructions in the WordPress admin using any widget you lik
 
 **The plugin [Classic Widgets](https://wordpress.org/plugins/classic-widgets/) is needed (this plugin doesn't work with Gutenberg).**
 
-**Compatible with PHP 8.0**
+**Compatible with PHP 8.2**
 
 **Do you find this plugin helpful? Please consider [leaving a 5-star review](https://wordpress.org/support/view/plugin-reviews/dashboard-notes).**
 
