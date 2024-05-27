@@ -13,6 +13,7 @@
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       dashboard-notes
  * Domain Path:       /languages
+ * Requires Plugins:  classic-widgets
  */
 
 /**
