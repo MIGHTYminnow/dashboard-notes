@@ -99,7 +99,7 @@ function save_note() {
 	check_admin_referer( 'save_dashboard_note_nonce', 'save_dashboard_note_nonce_field' );
 
 	$title = sanitize_text_field( $_POST['title'] ?? '' );
-	$content = sanitize_textarea_field( $_POST['content'] ?? '' );
+	$content = wpautop( sanitize_textarea_field( $_POST['content'] ?? '' ) );
 
 	$widget_type = 'custom_html'; // ID base of the widget (e.g. 'text', 'recent-posts', 'nav_menu', etc.)
 	$sidebar_id  = 'dashboard-notes'; // Sidebar ID (as registered in your code)
@@ -140,9 +140,9 @@ function save_note() {
 		'style' => 'red',
 		'include-logo' => 1,
 		'logo-url' => '',
-		'incexc' => 'selected',
+		'incexc' => 'show',
 		'url' => array(
-			'urls' => 'plugins.php',
+			'urls' => '',
 		),
 	);
 
