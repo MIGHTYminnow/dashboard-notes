@@ -81,26 +81,33 @@ function display_admin_page() {
 
 			$sidebars_widgets = get_option( 'sidebars_widgets' );
 
-			foreach ( $sidebars_widgets['dashboard-notes'] as $widget ) {
+			foreach ( $sidebars_widgets['dashboard-notes'] as $widget_id ) {
+				preg_match( '/^(.*)-(\d+)$/', $widget_id, $widget );
+				$widget_type = $widget[1] ?? '';
+				$widget_index = $widget[2] ?? '';
+
+				$widget_title = $widgets[ $widget_type ][ $widget_index ]['title'] ?? '';
+				$widget_content = $widgets[ $widget_type ][ $widget_index ]['content'] ?? '';
 				?>
 				<div>
-				<h2>Edit Note <?php echo $widget; ?></h2>
-					<form id="dn-add" method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
+					<h2>Edit Note</h2>
+					<form id="dn-edit-<?php echo $widget_id; ?>" method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
 						<div>
-							<label for="dn-add-title"><?php _e( 'Title', 'dashboard-notes' ); ?></label>
-							<input type="text" id="dn-add-title" name="title" required>
+							<label for="dn-edit-title-<?php echo $widget_id; ?>"><?php _e( 'Title', 'dashboard-notes' ); ?></label>
+							<input type="text" id="dn-edit-title-<?php echo $widget_id; ?>" name="title" required value="<?php echo $widget_title; ?>">
 						</div>
 
 						<div>
-							<label for="dn-add-content"><?php _e( 'Content', 'dashboard-notes' ); ?></label>
-							<textarea id="dn-add-content" name="content" rows="6" required></textarea>
+							<label for="dn-edit-content"><?php _e( 'Content', 'dashboard-notes' ); ?></label>
+							<textarea id="dn-edit-content" name="content" rows="6" required><?php echo $widget_content; ?></textarea>
 						</div>
 
-						<input type="hidden" name="action" value="save_dashboard_note">
-						<?php wp_nonce_field( 'save_dashboard_note_nonce', 'save_dashboard_note_nonce_field' ); ?>
+						<input type="hidden" name="action" value="edit_dashboard_note">
+						<input type="hidden" name="note_id" value="<?php echo $widget_id; ?>">
+						<?php wp_nonce_field( "edit_dashboard_note_{$widget_id}", 'edit_dashboard_note_nonce' ); ?>
 
 						<div>
-							<button type="submit" id="dn-add-submit">Save</button>
+							<button type="submit" id="dn-edit-submit-<?php echo $widget_id; ?>">Save</button>
 						</div>
 					</form>
 				</div>
@@ -179,4 +186,34 @@ function save_note() {
 
 	wp_redirect( admin_url( 'admin.php?page=dashboard-notes&saved=1' ) );
 	exit;
+}
+
+add_action( 'admin_post_edit_dashboard_note', __NAMESPACE__ . '\edit_note' );
+
+function edit_note() {
+	check_admin_referer( 'edit_dashboard_note_' . $_POST['note_id'], 'edit_dashboard_note_nonce' );
+
+	$widget_data = parse_widget_id( $_POST['note_id'] );
+
+	$widget_instances = get_option( 'widget_' . $widget_data['type'], array() );
+
+	$widget_instances[ $widget_data['index'] ] = array(
+		'title' => $_POST['title'],
+		'content' => $_POST['content'],
+	);
+
+	update_option( 'widget_' . $widget_data['type'], $widget_instances );
+
+	wp_redirect( admin_url( 'admin.php?page=dashboard-notes&updated=1' ) );
+	exit;
+}
+
+function parse_widget_id( $widget_id ) {
+	preg_match( '/^(.*)-(\d+)$/', $widget_id, $matches );
+
+	return array(
+		'id' => $widget_id,
+		'type'  => isset( $matches[1] ) ? $matches[1] : '',
+		'index' => isset( $matches[2] ) ? (int) $matches[2] : null,
+	);
 }
