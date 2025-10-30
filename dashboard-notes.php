@@ -15,10 +15,20 @@
  * Domain Path:       /languages
  */
 
+// Plugin Version
+define( 'DASHBOARD_NOTES_VERSION', '2.0.0-alpha' );
+
+
+define( 'DASHBOARD_NOTES_URL', plugins_url( '/', __FILE__ ) );
+
+// Admin Page
+require_once __DIR__ . '/includes/admin-page.php';
+
 /**
  * Set up new Dashboard Notes object.
  */
-new DashboardNotes();
+global $dashboard_notes;
+$dashboard_notes = new DashboardNotes();
 
 /**
  * Dashboard Notes plugin object.
