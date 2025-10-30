@@ -42,6 +42,8 @@ function display_admin_page() {
 	global $dashboard_notes;
 	?>
 	<div class="wrap">
+		<h1>Dashboard Notes</h1>
+		<h2>Add New Note</h2>
 		<form id="dn-add" method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
 			<div>
 				<label for="dn-add-title"><?php _e( 'Title', 'dashboard-notes' ); ?></label>
@@ -61,8 +63,8 @@ function display_admin_page() {
 			</div>
 		</form>
 
+		<h2>Current Notes</h2>
 		<?php
-		/*
 		$widgets = array(); // Widgets
 
 		// For each widget in the dashboard notes sidebar
@@ -77,17 +79,44 @@ function display_admin_page() {
 				$widgets[ $widget_name ] = get_option( "widget_{$widget_name}" );
 			}
 
-			// Print Widget Data
-			echo '<pre>';
-			print_r( $widgets[ $widget_name ][ $widget_index ] );
-			echo '</pre>';
+			$sidebars_widgets = get_option( 'sidebars_widgets' );
 
-			// Print Widget Dashboard Notes Options
-			echo '<pre>';
-			print_r( $dashboard_notes->dn_options[ $widget_id ] );
-			echo '</pre>';
+			foreach ( $sidebars_widgets['dashboard-notes'] as $widget ) {
+				?>
+				<div>
+				<h2>Edit Note <?php echo $widget; ?></h2>
+					<form id="dn-add" method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
+						<div>
+							<label for="dn-add-title"><?php _e( 'Title', 'dashboard-notes' ); ?></label>
+							<input type="text" id="dn-add-title" name="title" required>
+						</div>
+
+						<div>
+							<label for="dn-add-content"><?php _e( 'Content', 'dashboard-notes' ); ?></label>
+							<textarea id="dn-add-content" name="content" rows="6" required></textarea>
+						</div>
+
+						<input type="hidden" name="action" value="save_dashboard_note">
+						<?php wp_nonce_field( 'save_dashboard_note_nonce', 'save_dashboard_note_nonce_field' ); ?>
+
+						<div>
+							<button type="submit" id="dn-add-submit">Save</button>
+						</div>
+					</form>
+				</div>
+				<?php
+			}
+
+			// // Print Widget Data
+			// echo '<pre>';
+			// print_r( $widgets[ $widget_name ][ $widget_index ] );
+			// echo '</pre>';
+
+			// // Print Widget Dashboard Notes Options
+			// echo '<pre>';
+			// print_r( $dashboard_notes->dn_options[ $widget_id ] );
+			// echo '</pre>';
 		}
-		*/
 		?>
 	</div>
 	<?php
