@@ -134,8 +134,8 @@ add_action( 'admin_post_save_dashboard_note', __NAMESPACE__ . '\save_note' );
 function save_note() {
 	check_admin_referer( 'save_dashboard_note_nonce', 'save_dashboard_note_nonce_field' );
 
-	$title = sanitize_text_field( $_POST['title'] ?? '' );
-	$content = wpautop( sanitize_textarea_field( $_POST['content'] ?? '' ) );
+	$title = sanitize_text_field( $_POST['title'] );
+	$content = sanitize_textarea_field( $_POST['content'] );
 
 	$widget_type = 'custom_html'; // ID base of the widget (e.g. 'text', 'recent-posts', 'nav_menu', etc.)
 	$sidebar_id  = 'dashboard-notes'; // Sidebar ID (as registered in your code)
@@ -217,3 +217,17 @@ function parse_widget_id( $widget_id ) {
 		'index' => isset( $matches[2] ) ? (int) $matches[2] : null,
 	);
 }
+
+add_action( 'admin_init', function() {
+	if ( isset( $_GET['debug'] ) ) {
+		if ( ! function_exists( 'next_widget_id_number' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/widgets.php';
+		}
+		echo \next_widget_id_number( 'custom_html' );
+		echo '<pre>';
+		print_r( get_option( 'widget_custom_html' ) );
+		
+		exit;
+	}
+
+}, 9999999 );
